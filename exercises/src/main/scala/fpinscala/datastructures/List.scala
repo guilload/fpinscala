@@ -133,4 +133,9 @@ object List { // `List` companion object. Contains functions for creating and wo
     case _ => Nil
   }
 
+  def zipWith[A, B, C](l: List[A], r: List[B])(f: (A, B) => C): List[C] = (l, r) match {
+    case (Cons(x, xs), Cons(y, ys)) => Cons(f(x, y), zipWith(xs, ys)(f)) // still not stack-safe... :)
+    case _ => Nil
+  }
+
 }
