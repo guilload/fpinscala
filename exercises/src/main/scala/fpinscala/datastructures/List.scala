@@ -128,4 +128,9 @@ object List { // `List` companion object. Contains functions for creating and wo
   def filterViaFlatMap[A](l: List[A])(f: A => Boolean): List[A] =
     flatMap(l)(x => if (f(x)) List(x) else Nil) // not stack-safe
 
+  def zipSum(l: List[Int], r: List[Int]): List[Int] = (l, r) match {
+    case (Cons(x, xs), Cons(y, ys)) => Cons(x + y, zipSum(xs, ys)) // still not stack-safe... :)
+    case _ => Nil
+  }
+
 }
