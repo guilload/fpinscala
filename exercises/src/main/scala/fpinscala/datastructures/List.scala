@@ -60,7 +60,16 @@ object List { // `List` companion object. Contains functions for creating and wo
     case Cons(_, xs) => Cons(h, xs)
   }
 
-  def drop[A](l: List[A], n: Int): List[A] = ???
+  def isEmpty[A](l: List[A]): Boolean = l match {
+    case Nil => true
+    case _ => false
+  }
+
+  def drop[A](l: List[A], n: Int): List[A] = {
+    if (n < 0) throw new UnsupportedOperationException("n must be greater than or equal to zero")
+    else if (n == 0 || isEmpty(l)) l
+    else drop(tail(l), n - 1)
+  }
 
   def dropWhile[A](l: List[A], f: A => Boolean): List[A] = ???
 
