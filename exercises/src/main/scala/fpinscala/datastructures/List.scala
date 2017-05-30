@@ -110,5 +110,8 @@ object List { // `List` companion object. Contains functions for creating and wo
   def flatten[A](ll: List[List[A]]): List[A] =
     foldRight(ll, Nil[A])(append) // not stack-safe
 
+  def addOne(l: List[Int]): List[Int] =
+    foldRight(l, Nil[Int])((x, acc) => Cons(x + 1, acc)) // not stack-safe
+
   def map[A,B](l: List[A])(f: A => B): List[B] = ???
 }
