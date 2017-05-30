@@ -113,5 +113,8 @@ object List { // `List` companion object. Contains functions for creating and wo
   def addOne(l: List[Int]): List[Int] =
     foldRight(l, Nil[Int])((x, acc) => Cons(x + 1, acc)) // not stack-safe
 
+  def doubleToString(l: List[Double]): List[String] =
+    foldRight(l, Nil[Int])((x, acc) => Cons(x.toString, acc)) // not stack-safe
+
   def map[A,B](l: List[A])(f: A => B): List[B] = ???
 }
