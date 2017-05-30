@@ -65,6 +65,8 @@ object List { // `List` companion object. Contains functions for creating and wo
     case _ => false
   }
 
+  def nonEmpty[A](l: List[A]): Boolean = !isEmpty(l)
+
   def drop[A](l: List[A], n: Int): List[A] = {
     if (n < 0) throw new UnsupportedOperationException("n must be greater than or equal to zero")
     else if (n == 0 || isEmpty(l)) l
@@ -136,6 +138,19 @@ object List { // `List` companion object. Contains functions for creating and wo
   def zipWith[A, B, C](l: List[A], r: List[B])(f: (A, B) => C): List[C] = (l, r) match {
     case (Cons(x, xs), Cons(y, ys)) => Cons(f(x, y), zipWith(xs, ys)(f)) // still not stack-safe... :)
     case _ => Nil
+  }
+
+  @annotation.tailrec
+  def hasSubsequence[A](l: List[A], sub: List[A]): Boolean = {
+
+    @annotation.tailrec
+    def startsWith(l: List[A], sub: List[A]): Boolean = (l, sub) match {
+      case (_, Nil) => true
+      case (Cons(x, xs), Cons(y, ys)) => x == y && startsWith(xs, ys)
+      case _ => false
+    }
+
+    startsWith(l, sub) || nonEmpty(l) && hasSubsequence(tail(l), sub)
   }
 
 }
