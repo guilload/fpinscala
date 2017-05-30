@@ -119,4 +119,7 @@ object List { // `List` companion object. Contains functions for creating and wo
   def map[A,B](l: List[A])(f: A => B): List[B] =
     foldRight(l, Nil[B])((x, acc) => Cons(f(x), acc)) // not stack-safe
 
+  def filter[A](l: List[A])(f: A => Boolean): List[A] =
+    foldRight(l, Nil[A])((x, acc) => if (f(x)) Cons(x, acc) else acc) // not stack-safe
+
 }
