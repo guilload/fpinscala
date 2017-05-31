@@ -17,4 +17,9 @@ object Tree {
     case Leaf(value) => value
   }
 
+  def depth[A](tree: Tree[A]): Int = tree match {
+    case Branch(left, right) => 1 + (depth(left) max depth(right)) // not stack-safe
+    case _ => 0
+  }
+
 }
