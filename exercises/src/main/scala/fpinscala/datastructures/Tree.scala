@@ -12,5 +12,9 @@ object Tree {
     case _ => 1
   }
 
+  def maximum(tree: Tree[Int]): Int = tree match {
+    case Branch(left, right) => maximum(left) max maximum(right) // not stack-safe
+    case Leaf(value) => value
+  }
 
 }
