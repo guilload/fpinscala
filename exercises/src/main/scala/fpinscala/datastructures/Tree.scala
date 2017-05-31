@@ -22,4 +22,9 @@ object Tree {
     case _ => 0
   }
 
+  def map[A, B](tree: Tree[A])(f: A => B): Tree[B] = tree match {
+    case Branch(left, right) => Branch(map(left)(f), map(right)(f)) // not stack-safe
+    case Leaf(value) => Leaf(f(value))
+  }
+
 }
