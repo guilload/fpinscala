@@ -72,5 +72,9 @@ object Option {
   def sequence[A](xs: List[Option[A]]): Option[List[A]] =
     xs.foldRight[Option[List[A]]](Some(Nil))((opt, acc) => map2(opt, acc)(_ :: _))
 
-  def traverse[A, B](a: List[A])(f: A => Option[B]): Option[List[B]] = ???
+  def traverse[A, B](xs: List[A])(f: A => Option[B]): Option[List[B]] =
+    xs.foldRight[Option[List[B]]](Some(Nil))((x, acc) => map2(f(x), acc)(_ :: _))
+
+  def sequenceViaTraverse[A](a: List[Option[A]]): Option[List[A]] =
+    traverse(a)(identity)
 }
