@@ -31,15 +31,17 @@ sealed trait Either[+E,+A] {
 
 }
 
-case class Left[+E](get: E) extends Either[E,Nothing]
+case class Left[+E](get: E) extends Either[E, Nothing]
 
-case class Right[+A](get: A) extends Either[Nothing,A]
+case class Right[+A](get: A) extends Either[Nothing, A]
 
 object Either {
 
-  def traverse[E,A,B](es: List[A])(f: A => Either[E, B]): Either[E, List[B]] = ???
+  def traverse[E, A, B](xs: List[A])(f: A => Either[E, B]): Either[E, List[B]] =
+    xs.foldRight[Either[E, List[B]]](Right(List()))((x, acc) => f(x).map2(acc)(_ :: _))
 
-  def sequence[E,A](es: List[Either[E,A]]): Either[E,List[A]] = ???
+  def sequence[E, A](xs: List[Either[E, A]]): Either[E, List[A]] =
+    traverse(xs)(identity)
 
   def mean(xs: IndexedSeq[Double]): Either[String, Double] = 
     if (xs.isEmpty) 
