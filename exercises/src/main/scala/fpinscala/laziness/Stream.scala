@@ -117,4 +117,14 @@ object Stream {
     case _ => empty
   }
 
+  case object Void
+
+  val onesViaUnfold: Stream[Int] = unfold(Void)(_ => Some(1, Void))
+
+  def constantViaUnfold[A](a: A): Stream[A] = unfold(Void)(_ => Some(a, Void))
+
+  val fibsViaUnfold: Stream[Int] = unfold((0, 1)) { case (current, next) => Some((current, (next, current + next))) }
+
+  def fromViaUnfold(n: Int): Stream[Int] = unfold(n)(i => Some(i, i + 1))
+
 }
