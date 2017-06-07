@@ -102,7 +102,8 @@ object Stream {
     tail
   }
 
-  def from(n: Int): Stream[Int] = ???
+  def from(n: Int): Stream[Int] =
+    cons(n, from(n + 1))
 
   def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A] = ???
 
