@@ -56,7 +56,8 @@ trait Stream[+A] {
     case _ => true
   }
 
-  def headOption: Option[A] = ???
+  def headOption: Option[A] =
+    foldRight(None: Option[A])((head, _) => Some(head))
 
   // 5.7 map, filter, append, flatmap using foldRight. Part of the exercise is
   // writing your own function signatures.
