@@ -47,6 +47,9 @@ trait Stream[+A] {
     case _ => empty
   }
 
+  def takeWhileViaFoldRight(p: A => Boolean): Stream[A] =
+    foldRight(empty[A])((head, tail) => if (p(head)) cons(head, tail) else empty)
+
   @annotation.tailrec
   final def forAll(p: A => Boolean): Boolean = this match {
     case Cons(head, tail) => p(head()) && tail().forAll(p)
