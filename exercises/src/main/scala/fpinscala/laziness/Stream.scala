@@ -47,7 +47,11 @@ trait Stream[+A] {
     case _ => empty
   }
 
-  def forAll(p: A => Boolean): Boolean = ???
+  @annotation.tailrec
+  final def forAll(p: A => Boolean): Boolean = this match {
+    case Cons(head, tail) => p(head()) && tail().forAll(p)
+    case _ => true
+  }
 
   def headOption: Option[A] = ???
 
