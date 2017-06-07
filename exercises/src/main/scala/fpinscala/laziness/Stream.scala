@@ -1,11 +1,17 @@
 package fpinscala.laziness
 
+
 import Stream._
+
+
 trait Stream[+A] {
+
+  def toList: List[A] =
+    foldRight(List[A]())(_ :: _) // not stack-safe
 
   def foldRight[B](z: => B)(f: (A, => B) => B): B = // The arrow `=>` in front of the argument type `B` means that the function `f` takes its second argument by name and may choose not to evaluate it.
     this match {
-      case Cons(h,t) => f(h(), t().foldRight(z)(f)) // If `f` doesn't evaluate its second argument, the recursion never occurs.
+      case Cons(h, t) => f(h(), t().foldRight(z)(f)) // If `f` doesn't evaluate its second argument, the recursion never occurs.
       case _ => z
     }
 
@@ -17,6 +23,7 @@ trait Stream[+A] {
     case Empty => None
     case Cons(h, t) => if (f(h())) Some(h()) else t().find(f)
   }
+
   def take(n: Int): Stream[A] = ???
 
   def drop(n: Int): Stream[A] = ???
@@ -31,11 +38,15 @@ trait Stream[+A] {
   // writing your own function signatures.
 
   def startsWith[B](s: Stream[B]): Boolean = ???
+
 }
+
 case object Empty extends Stream[Nothing]
+
 case class Cons[+A](h: () => A, t: () => Stream[A]) extends Stream[A]
 
 object Stream {
+
   def cons[A](hd: => A, tl: => Stream[A]): Stream[A] = {
     lazy val head = hd
     lazy val tail = tl
@@ -49,7 +60,9 @@ object Stream {
     else cons(as.head, apply(as.tail: _*))
 
   val ones: Stream[Int] = Stream.cons(1, ones)
+
   def from(n: Int): Stream[Int] = ???
 
   def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A] = ???
+
 }
