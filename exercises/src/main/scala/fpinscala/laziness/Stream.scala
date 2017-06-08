@@ -73,6 +73,38 @@ trait Stream[+A] {
   def flatMap[B](f: A => Stream[B]): Stream[B] =
     foldRight(empty[B])((head, tail) => f(head).append(tail))
 
+  def mapViaUnfold[B](f: A => B): Stream[B] =
+    unfold(this) {
+      case Cons(head, tail) => Some((f(head()), tail()))
+      case _ => None
+    }
+
+  def takeViaUnfold(n: Int): Stream[A] =
+    unfold((this, n)) {
+      case (Cons(head, tail), m) if m > 0 => Some(head(), (tail(), m - 1))
+      case _ => None
+    }
+
+  def takeWhileViaUnfold(p: A => Boolean): Stream[A] =
+    unfold(this) {
+      case Cons(head, tail) if p(head()) => Some((head(), tail()))
+      case _ => None
+  }
+
+  def zipWithViaUnfold[B, C](other: Stream[B])(f: (A, B) => C): Stream[C] =
+    unfold((this, other)) {
+      case (Cons(lhead, ltail), Cons(rhead, rtail)) => Some((f(lhead(), rhead()), (ltail(), rtail())))
+      case _ => None
+    }
+
+  def zipAllViaUnfold[B](other: Stream[B]): Stream[(Option[A], Option[B])] =
+    unfold((this, other)) {
+      case (Cons(lhead, ltail), Cons(rhead, rtail)) => Some(((Some(lhead()), Some(rhead())), (ltail(), rtail())))
+      case (Cons(lhead, ltail), _) => Some(((Some(lhead()), None), (ltail(), Empty)))
+      case (_, Cons(rhead, rtail)) => Some(((None, Some(rhead())), (Empty, rtail())))
+      case _ => None
+    }
+
   def startsWith[B](s: Stream[B]): Boolean = ???
 
 }
