@@ -105,7 +105,8 @@ trait Stream[+A] {
       case _ => None
     }
 
-  def startsWith[B](s: Stream[B]): Boolean = ???
+  def startsWith[B](sub: Stream[B]): Boolean =
+    zipAllViaUnfold(sub).takeWhile { case (_, r) => r.nonEmpty }.forAll { case (l, r) => l == r }
 
 }
 
