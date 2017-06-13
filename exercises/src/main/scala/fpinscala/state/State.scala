@@ -145,14 +145,42 @@ object State {
   def sequence[S, A](xs: List[State[S, A]]): State[S, List[A]] =
     xs.foldRight(unit[S, List[A]](List()))((s, acc) => s.map2(acc)(_ :: _))
 
-  type Rand[A] = State[RNG, A]
+  def modify[S](f: S => S): State[S, Unit] = for {
+    state <- get
+    _ <- set(f(state))
+  } yield ()
 
-  def simulateMachine(inputs: List[Input]): State[Machine, (Int, Int)] = ???
+  def get[S]: State[S, S] = State(state => (state, state))
+
+  def set[S](state: S): State[S, Unit] = State(_ => ((), state))
 
 }
 
 sealed trait Input
+
 case object Coin extends Input
 case object Turn extends Input
 
-case class Machine(locked: Boolean, candies: Int, coins: Int)
+case class Machine(locked: Boolean, candies: Int, coins: Int) {
+
+  def unlocked: Boolean = !locked
+
+  def update(input: Input): Machine =
+    input match {
+      case Coin if locked && candies > 0 => copy(locked = false, coins = coins + 1)
+      case Turn if unlocked => copy(locked = true, candies = candies - 1)
+      case _ => this
+    }
+
+}
+
+object Machine {
+
+  import State._
+
+  def simulate(inputs: List[Input]): State[Machine, (Int, Int)] = for {
+    _ <- sequence(inputs.map(input => modify[Machine](m => m.update(input))))
+    machine <- get
+  } yield (machine.coins, machine.candies)
+
+}
