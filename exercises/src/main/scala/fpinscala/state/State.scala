@@ -41,7 +41,10 @@ object RNG {
     (if (n < 0) -(n + 1) else n, next)
   }
 
-  def double(rng: RNG): (Double, RNG) = ???
+  def double(rng: RNG): (Double, RNG) = {
+    val (n, next) = rng.nextInt
+    (n / (Int.MaxValue.toDouble + 1), next)
+  }
 
   def intDouble(rng: RNG): ((Int,Double), RNG) = ???
 
