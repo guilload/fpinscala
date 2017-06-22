@@ -41,7 +41,10 @@ object Monoid {
     val zero: Boolean = false
   }
 
-  def optionMonoid[A]: Monoid[Option[A]] = ???
+  def optionMonoid[A]: Monoid[Option[A]] = new Monoid[Option[A]] {
+    def op(a1: Option[A], a2: Option[A]): Option[A] = a1 orElse a2
+    def zero: Option[A] = None
+  }
 
   def endoMonoid[A]: Monoid[A => A] = ???
 
