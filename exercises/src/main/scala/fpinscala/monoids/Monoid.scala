@@ -97,6 +97,9 @@ object Monoid {
 
   sealed trait WC {
     def +(other: WC): WC
+    def wordCount: Int
+
+    protected def carry(s: String): Int = if (s.isEmpty) 0 else 1
   }
 
   case class Stub(chars: String) extends WC {
@@ -106,6 +109,8 @@ object Monoid {
       case p @ Part(l, _, _) => p.copy(lStub = chars + l)
     }
 
+    def wordCount: Int = carry(chars)
+
   }
 
   case class Part(lStub: String, words: Int, rStub: String) extends WC {
@@ -113,9 +118,10 @@ object Monoid {
     def +(other: WC): WC = other match {
       case Stub(s) => copy(rStub = rStub + s)
       case Part(l, w, r) =>
-        val carry = if (rStub.nonEmpty || l.nonEmpty) 1 else 0
-        copy(words = words + w + carry, rStub = r)
+        copy(words = words + w + carry(rStub + l), rStub = r)
     }
+
+    def wordCount: Int = words + carry(lStub) + carry(rStub)
 
   }
 
@@ -132,7 +138,11 @@ object Monoid {
     def zero: WC = Stub("")
   }
 
-  def count(s: String): Int = ???
+  implicit class WordCountOps(val c: Char) extends AnyVal {
+    def toWC: WC = if (c.isWhitespace) Part("", 0, "") else Stub(c.toString)
+  }
+
+  def count(s: String): Int = foldMapV(s, wcMonoid)(_.toWC).wordCount
 
   def productMonoid[A,B](A: Monoid[A], B: Monoid[B]): Monoid[(A, B)] =
     ???
