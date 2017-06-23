@@ -5,8 +5,15 @@ import fpinscala.parallelism.Nonblocking.Par.toParOps // infix syntax for `Par.m
 import language.higherKinds
 
 trait Monoid[A] {
+  self =>
   def op(a1: A, a2: A): A
   def zero: A
+
+  def dual: Monoid[A] = new Monoid[A] {
+    def op(a1: A, a2: A): A = self.op(a2, a1)
+    val zero: A = self.zero
+  }
+
 }
 
 object Monoid {
