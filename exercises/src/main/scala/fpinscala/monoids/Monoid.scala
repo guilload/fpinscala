@@ -84,7 +84,13 @@ object Monoid {
     foldMap(as, endoMonoid[B].dual)(a => b => f(b, a))(z)
 
   def foldMapV[A, B](as: IndexedSeq[A], m: Monoid[B])(f: A => B): B =
-    ???
+    as.length match {
+      case 0 => m.zero
+      case 1 => f(as.head)
+      case l =>
+        val (left, right) = as.splitAt(l / 2)
+        m.op(foldMapV(left, m)(f), foldMapV(right, m)(f))
+    }
 
   def ordered(ints: IndexedSeq[Int]): Boolean =
     ???
