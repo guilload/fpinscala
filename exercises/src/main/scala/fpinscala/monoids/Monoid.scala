@@ -95,9 +95,29 @@ object Monoid {
   def ordered(ints: IndexedSeq[Int]): Boolean =
     ???
 
-  sealed trait WC
-  case class Stub(chars: String) extends WC
-  case class Part(lStub: String, words: Int, rStub: String) extends WC
+  sealed trait WC {
+    def +(other: WC): WC
+  }
+
+  case class Stub(chars: String) extends WC {
+
+    def +(other: WC): WC = other match {
+      case Stub(s) => Stub(chars + s)
+      case p @ Part(l, _, _) => p.copy(lStub = chars + l)
+    }
+
+  }
+
+  case class Part(lStub: String, words: Int, rStub: String) extends WC {
+
+    def +(other: WC): WC = other match {
+      case Stub(s) => copy(rStub = rStub + s)
+      case Part(l, w, r) =>
+        val carry = if (rStub.nonEmpty || l.nonEmpty) 1 else 0
+        copy(words = words + w + carry, rStub = r)
+    }
+
+  }
 
   def par[A](m: Monoid[A]): Monoid[Par[A]] = new Monoid[Par[A]] {
     def op(a1: Par[A], a2: Par[A]): Par[A] = Par.map2(a1, a2)(m.op)
@@ -107,7 +127,10 @@ object Monoid {
   def parFoldMap[A,B](v: IndexedSeq[A], m: Monoid[B])(f: A => B): Par[B] =
     foldMapV(v, par(m))(a => Par.unit(a).map(f))
 
-  val wcMonoid: Monoid[WC] = ???
+  val wcMonoid: Monoid[WC] = new Monoid[WC] {
+    def op(a1: WC, a2: WC): WC = a1 + a2
+    def zero: WC = Stub("")
+  }
 
   def count(s: String): Int = ???
 
