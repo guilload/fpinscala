@@ -144,8 +144,12 @@ object Monoid {
 
   def count(s: String): Int = foldMapV(s, wcMonoid)(_.toWC).wordCount
 
-  def productMonoid[A,B](A: Monoid[A], B: Monoid[B]): Monoid[(A, B)] =
-    ???
+  def productMonoid[A, B](ma: Monoid[A], mb: Monoid[B]): Monoid[(A, B)] = new Monoid[(A, B)] {
+
+    def op(a1: (A, B), a2: (A, B)): (A, B) = (ma.op(a1._1, a2._1), mb.op(a1._2, a2._2))
+
+    def zero: (A, B) = (ma.zero, mb.zero)
+  }
 
   def functionMonoid[A,B](B: Monoid[B]): Monoid[A => B] =
     ???
