@@ -157,11 +157,24 @@ object Monoid {
     def zero: A => B = _ => m.zero
   }
 
-  def mapMergeMonoid[K,V](V: Monoid[V]): Monoid[Map[K, V]] =
-    ???
+  def mapMergeMonoid[K, V](m: Monoid[V]): Monoid[Map[K, V]] = new Monoid[Map[K, V]] {
 
-  def bag[A](as: IndexedSeq[A]): Map[A, Int] =
-    ???
+    def op(left: Map[K, V], right: Map[K, V]): Map[K, V] = {
+      val (small, big) = if (left.size < right.size) (left, right) else (right, left)
+      small.foldLeft(big){ case (acc, (k, v)) =>
+        val entry = k -> acc.get(k).map(m.op(_, v)).getOrElse(v)
+        acc + entry
+      }
+    }
+
+    def zero: Map[K, V] = Map[K, V]()
+
+  }
+
+  def bag[A](as: IndexedSeq[A]): Map[A, Int] = {
+    foldMapV(as, mapMergeMonoid[A, Int](intAddition))((a: A) => Map(a -> 1))
+  }
+
 }
 
 
