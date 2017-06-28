@@ -157,48 +157,67 @@ object Monoid {
     ???
 }
 
+
 trait Foldable[F[_]] {
-  import Monoid._
+
+  import Monoid.endoMonoid
 
   def foldRight[A, B](as: F[A])(z: B)(f: (A, B) => B): B =
-    ???
+    foldMap(as)(a => (b: B) => f(a, b))(endoMonoid)(z)
 
   def foldLeft[A, B](as: F[A])(z: B)(f: (B, A) => B): B =
-    ???
+    foldMap(as)(a => (b: B) => f(b, a))(endoMonoid.dual)(z)
 
-  def foldMap[A, B](as: F[A])(f: A => B)(mb: Monoid[B]): B =
-    ???
+  def foldMap[A, B](as: F[A])(f: A => B)(m: Monoid[B]): B =
+    foldLeft(as)(m.zero)((b, a) => m.op(b, f(a)))
 
   def concatenate[A](as: F[A])(m: Monoid[A]): A =
-    ???
+    foldLeft(as)(m.zero)(m.op)
 
   def toList[A](as: F[A]): List[A] =
-    ???
+    foldRight(as)(List[A]())(_ :: _)
+
 }
+
 
 object ListFoldable extends Foldable[List] {
-  override def foldRight[A, B](as: List[A])(z: B)(f: (A, B) => B) =
-    ???
-  override def foldLeft[A, B](as: List[A])(z: B)(f: (B, A) => B) =
-    ???
-  override def foldMap[A, B](as: List[A])(f: A => B)(mb: Monoid[B]): B =
-    ???
+
+  override def foldRight[A, B](as: List[A])(z: B)(f: (A, B) => B): B =
+    as.foldRight(z)(f)
+
+  override def foldLeft[A, B](as: List[A])(z: B)(f: (B, A) => B): B =
+    as.foldLeft(z)(f)
+
+  override def foldMap[A, B](as: List[A])(f: A => B)(m: Monoid[B]): B =
+    as.foldLeft(m.zero)((b, a) => m.op(b, f(a)))
+
 }
+
 
 object IndexedSeqFoldable extends Foldable[IndexedSeq] {
-  override def foldRight[A, B](as: IndexedSeq[A])(z: B)(f: (A, B) => B) =
-    ???
-  override def foldLeft[A, B](as: IndexedSeq[A])(z: B)(f: (B, A) => B) =
-    ???
-  override def foldMap[A, B](as: IndexedSeq[A])(f: A => B)(mb: Monoid[B]): B =
-    ???
+
+  import Monoid.foldMapV
+
+  override def foldRight[A, B](as: IndexedSeq[A])(z: B)(f: (A, B) => B): B =
+    as.foldRight(z)(f)
+
+  override def foldLeft[A, B](as: IndexedSeq[A])(z: B)(f: (B, A) => B): B =
+    as.foldLeft(z)(f)
+
+  override def foldMap[A, B](as: IndexedSeq[A])(f: A => B)(m: Monoid[B]): B =
+    foldMapV(as, m)(f)
+
 }
 
+
 object StreamFoldable extends Foldable[Stream] {
-  override def foldRight[A, B](as: Stream[A])(z: B)(f: (A, B) => B) =
-    ???
-  override def foldLeft[A, B](as: Stream[A])(z: B)(f: (B, A) => B) =
-    ???
+
+  override def foldRight[A, B](as: Stream[A])(z: B)(f: (A, B) => B): B =
+    as.foldRight(z)(f)
+
+  override def foldLeft[A, B](as: Stream[A])(z: B)(f: (B, A) => B): B =
+    as.foldLeft(z)(f)
+
 }
 
 sealed trait Tree[+A]
