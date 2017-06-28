@@ -220,17 +220,30 @@ object StreamFoldable extends Foldable[Stream] {
 
 }
 
+
 sealed trait Tree[+A]
+
 case class Leaf[A](value: A) extends Tree[A]
+
 case class Branch[A](left: Tree[A], right: Tree[A]) extends Tree[A]
 
 object TreeFoldable extends Foldable[Tree] {
-  override def foldMap[A, B](as: Tree[A])(f: A => B)(mb: Monoid[B]): B =
-    ???
-  override def foldLeft[A, B](as: Tree[A])(z: B)(f: (B, A) => B) =
-    ???
-  override def foldRight[A, B](as: Tree[A])(z: B)(f: (A, B) => B) =
-    ???
+
+  override def foldMap[A, B](as: Tree[A])(f: A => B)(m: Monoid[B]): B = as match {
+    case Branch(left, right) => m.op(foldMap(left)(f)(m), foldMap(right)(f)(m))
+    case Leaf(value) => f(value)
+  }
+
+  override def foldLeft[A, B](as: Tree[A])(z: B)(f: (B, A) => B): B = as match {
+    case Branch(left, right) => foldLeft(right)(foldLeft(left)(z)(f))(f)
+    case Leaf(value) => f(z, value)
+  }
+
+  override def foldRight[A, B](as: Tree[A])(z: B)(f: (A, B) => B): B = as match {
+    case Branch(left, right) => foldRight(left)(foldRight(right)(z)(f))(f)
+    case Leaf(value) => f(value, z)
+  }
+
 }
 
 object OptionFoldable extends Foldable[Option] {
