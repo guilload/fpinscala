@@ -101,7 +101,7 @@ object List { // `List` companion object. Contains functions for creating and wo
     foldLeft(l, 0)((acc, _) => acc + 1)
 
   def reverse[A](l: List[A]): List[A] =
-    foldLeft(l, Nil[A])((acc, x) => Cons(x, acc))
+    foldLeft(l, List[A]())((acc, x) => Cons(x, acc))
 
   def foldRight2[A, B](l: List[A], z: B)(f: (A, B) => B): B =
     foldLeft(reverse(l), z)((acc, x) => f(x, acc))
@@ -110,22 +110,22 @@ object List { // `List` companion object. Contains functions for creating and wo
     foldRight(l, r)(Cons(_,_)) // not stack-safe
 
   def flatten[A](ll: List[List[A]]): List[A] =
-    foldRight(ll, Nil[A])(append) // not stack-safe
+    foldRight(ll, List[A]())(append) // not stack-safe
 
   def addOne(l: List[Int]): List[Int] =
-    foldRight(l, Nil[Int])((x, acc) => Cons(x + 1, acc)) // not stack-safe
+    foldRight(l, List[Int]())((x, acc) => Cons(x + 1, acc)) // not stack-safe
 
   def doubleToString(l: List[Double]): List[String] =
-    foldRight(l, Nil[Int])((x, acc) => Cons(x.toString, acc)) // not stack-safe
+    foldRight(l, List[String]())((x, acc) => Cons(x.toString, acc)) // not stack-safe
 
   def map[A,B](l: List[A])(f: A => B): List[B] =
-    foldRight(l, Nil[B])((x, acc) => Cons(f(x), acc)) // not stack-safe
+    foldRight(l, List[B]())((x, acc) => Cons(f(x), acc)) // not stack-safe
 
   def filter[A](l: List[A])(f: A => Boolean): List[A] =
-    foldRight(l, Nil[A])((x, acc) => if (f(x)) Cons(x, acc) else acc) // not stack-safe
+    foldRight(l, List[A]())((x, acc) => if (f(x)) Cons(x, acc) else acc) // not stack-safe
 
   def flatMap[A, B](l: List[A])(f: A => List[B]): List[B] =
-    foldRight(l, Nil[B])((x, acc) => append(f(x), acc)) // or `flatten(map(l)(f))`, not stack-safe either way
+    foldRight(l, List[B]())((x, acc) => append(f(x), acc)) // or `flatten(map(l)(f))`, not stack-safe either way
 
   def filterViaFlatMap[A](l: List[A])(f: A => Boolean): List[A] =
     flatMap(l)(x => if (f(x)) List(x) else Nil) // not stack-safe
