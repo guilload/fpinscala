@@ -42,6 +42,12 @@ object Par {
   def map[A, B](pa: Par[A])(f: A => B): Par[B] =
     map2(pa, unit(()))((a,_) => f(a))
 
+  def flatMap[A, B](p: Par[A])(choices: A => Par[B]): Par[B] =
+    es => {
+      val k = run(es)(p).get
+      run(es)(choices(k))
+    }
+
   def sortPar(parList: Par[List[Int]]): Par[List[Int]] = map(parList)(_.sorted)
 
   def equal[A](e: ExecutorService)(p: Par[A], p2: Par[A]): Boolean = 
