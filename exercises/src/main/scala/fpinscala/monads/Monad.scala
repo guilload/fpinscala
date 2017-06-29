@@ -117,7 +117,14 @@ object Monad {
 
   def stateMonad[S]: Monad[S] = ???
 
-  val idMonad: Monad[Id] = ???
+
+  val idMonad: Monad[Id] = new Monad[Id] {
+
+    def unit[A](a: => A): Id[A] = Id(a)
+
+    def flatMap[A, B](id: Id[A])(f: A => Id[B]): Id[B] = id.flatMap(f)
+
+  }
 
   def readerMonad[R]: Monad[R] = ???
 
@@ -125,9 +132,9 @@ object Monad {
 
 case class Id[A](value: A) {
 
-  def map[B](f: A => B): Id[B] = ???
+  def map[B](f: A => B): Id[B] = copy(f(value))
 
-  def flatMap[B](f: A => Id[B]): Id[B] = ???
+  def flatMap[B](f: A => Id[B]): Id[B] = f(value)
 
 }
 
