@@ -8,6 +8,7 @@ import fpinscala.state._
 import fpinscala.testing._
 
 import scala.language.higherKinds
+import scala.language.reflectiveCalls
 
 
 trait Functor[F[_]] {
