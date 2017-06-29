@@ -67,6 +67,7 @@ object Monoid {
 
   import fpinscala.testing._
   import Prop._
+
   def monoidLaws[A](m: Monoid[A], gen: Gen[A]): Prop = ???
 
   def trimMonoid(s: String): Monoid[String] = ???
