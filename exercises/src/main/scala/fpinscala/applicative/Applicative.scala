@@ -86,8 +86,7 @@ object Monad {
 
 sealed trait Validation[+E, +A]
 
-case class Failure[E](head: E, tail: Vector[E])
-  extends Validation[E, Nothing]
+case class Failure[E](head: E, tail: Vector[E]) extends Validation[E, Nothing]
 
 case class Success[A](a: A) extends Validation[Nothing, A]
 
@@ -103,7 +102,18 @@ object Applicative {
 
   }
 
-  def validationApplicative[E]: Applicative[({type f[x] = Validation[E, x]})#f] = ???
+  def validationApplicative[E]: Applicative[({type f[x] = Validation[E, x]})#f] = new Applicative[({type f[x] = Validation[E, x]})#f] {
+
+    override def unit[A](a: => A): Validation[E, A] = Success(a)
+
+    override def map2[A, B, C](va: Validation[E, A], vb: Validation[E, B])(f: (A, B) => C): Validation[E, C] = (va, vb) match {
+      case (Success(a), Success(b)) => Success(f(a, b))
+      case (Failure(lhead, ltail), Failure(rhead, rtail)) => Failure(lhead, ltail ++ rtail :+ rhead)
+      case (_, f @ Failure(_, _)) => f
+      case (_, f @ Failure(_, _)) => f
+    }
+
+  }
 
   type Const[A, B] = A
 
