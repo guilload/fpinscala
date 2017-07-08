@@ -57,7 +57,17 @@ trait Applicative[F[_]] extends Functor[F] {
 
   def factor[A, B](fa: F[A], fb: F[B]): F[(A,B)] = ???
 
-  def compose[G[_]](G: Applicative[G]): Applicative[({type f[x] = F[G[x]]})#f] = ???
+  def compose[G[_]](G: Applicative[G]): Applicative[({type f[x] = F[G[x]]})#f] = {
+
+    val self = this
+
+    new Applicative[({type f[x] = F[G[x]]})#f] {
+
+      def unit[A](a: => A): F[G[A]] = self.unit(G.unit(a))
+
+    }
+
+  }
 
   def sequenceMap[K, V](ofa: Map[K, F[V]]): F[Map[K, V]] = ???
 }
