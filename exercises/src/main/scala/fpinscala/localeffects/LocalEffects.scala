@@ -159,9 +159,29 @@ object Immutable {
 
   def noop[S]: ST[S, Unit] = ST(())
 
-  def partition[S](a: STArray[S, Int], l: Int, r: Int, pivot: Int): ST[S, Int] = ???
+  // This is ridiculous...
+  def partition[S](a: STArray[S, Int], left: Int, right: Int, pivotIndex: Int): ST[S, Int] = for {
+    pivot <- a.read(pivotIndex)
+    _ <- a.swap(pivotIndex, right)
+    l <- STRef(left)
+    _ <- (left until right).foldLeft(noop[S])((s, i) => for {
+      _ <- s
+      value <- a.read(i)
+      _  <- if (value < pivot) for {
+        j <- l.read
+        _ <- a.swap(i, j)
+        _ <- l.write(j + 1)
+      } yield () else noop[S]
+    } yield ())
+    pi <- l.read
+    _ <- a.swap(pi, right)
+  } yield pi
 
-  def qs[S](a: STArray[S, Int], l: Int, r: Int): ST[S, Unit] = ???
+  def qs[S](a: STArray[S, Int], l: Int, r: Int): ST[S, Unit] = if (l >= r) noop[S] else for {
+    pivotIndex <- partition(a, l, r, l + (r - l) / 2)
+    _ <- qs(a, l, pivotIndex - 1)
+    _ <- qs(a, pivotIndex + 1, r)
+  } yield ()
 
   def quicksort(xs: List[Int]): List[Int] =
     if (xs.isEmpty) xs else ST.runST(new RunnableST[List[Int]] {
@@ -172,5 +192,6 @@ object Immutable {
         sorted <- arr.freeze
       } yield sorted
   })
+
 }
 
