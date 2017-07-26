@@ -1,5 +1,7 @@
 package fpinscala.localeffects
 
+import scala.collection.mutable
+
 
 object Mutable {
 
@@ -195,3 +197,38 @@ object Immutable {
 
 }
 
+sealed abstract class STHashMap[S, K, V] {
+
+  protected def value: mutable.HashMap[K, V]
+
+  def size: ST[S, Int] = ST(value.size)
+
+  // Read the value at the given index of the array
+  def read(k: K): ST[S, Option[V]] = ST(value.get(k))
+
+  // Write a value at the give index of the array
+  def write(k: K, v: V): ST[S, Unit] = new ST[S, Unit] {
+
+    def run(s: S): (Unit, S) = {
+      value += k -> v
+      ((), s)
+    }
+
+  }
+
+}
+
+object STHashMap {
+
+  // Construct an array of the given size filled with the value v
+  def apply[S, K, V](): ST[S, STHashMap[S, K, V]] =
+    ST(new STHashMap[S, K, V] {
+      lazy val value: mutable.HashMap[K, V] = mutable.HashMap.empty
+    })
+
+  def fromList[S, K, V](xs: List[(K, V)]): ST[S, STHashMap[S, K, V]] =
+    ST(new STHashMap[S, K, V] {
+      lazy val value: mutable.HashMap[K, V] = mutable.HashMap(xs: _*)
+    })
+
+}
