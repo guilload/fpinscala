@@ -222,6 +222,12 @@ object SimpleStreamTransducers {
     }
       yield (value, i - 1)
 
+    def zip[OO](p: Process[I, OO]): Process[I, (O, OO)] = for {
+      x <- this
+      y <- p
+    }
+      yield (x, y)
+
     /* Add `p` to the fallback branch of this process */
     def orElse(p: Process[I, O]): Process[I, O] = this match {
       case Halt() => p
@@ -373,6 +379,7 @@ object SimpleStreamTransducers {
      * allow for the definition of `mean` in terms of `sum` and
      * `count`?
      */
+    def mean2: Process[Double, Double] = sum.zip(count).map { case (acc, n) => acc / n }
 
     def feed[A, B](oa: Option[A])(p: Process[A, B]): Process[A, B] =
       p match {
